@@ -2,49 +2,53 @@ pipeline {
     agent any
 
     environment {
-        DOCKERHUB_CREDENTIALS = 'dockerhub-credentials' // Jenkins credentials ID
-        IMAGE_NAME = 'yourdockerhubusername/python-cicd-demo'
+        IMAGE_NAME = "my-python-app"
+        REGISTRY = ""  // set your docker registry here, or leave empty if local
     }
 
     stages {
-        stage('Clone Repo') {
+        stage('Checkout') {
             steps {
-                git 'https://github.com/karriGopichand/jenkins-pipeline-pythonflask.git'
+                checkout scm
             }
         }
 
-        stage('Install Dependencies') {
+        stage('Build') {
             steps {
+                echo 'Installing dependencies and running tests (if any)'
                 sh 'pip install -r requirements.txt'
+                // Add tests here if you want
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Docker Build') {
             steps {
-                sh 'docker build -t $IMAGE_NAME .'
-            }
-        }
-
-        stage('Login to DockerHub') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: "$DOCKERHUB_CREDENTIALS", passwordVariable: 'DOCKER_PASS', usernameVariable: 'DOCKER_USER')]) {
-                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
+                script {
+                    dockerImage = docker.build("${IMAGE_NAME}:latest")
                 }
             }
         }
 
-        stage('Push Image') {
+        stage('Docker Push') {
+            when {
+                expression { env.REGISTRY != "" }
+            }
             steps {
-                sh 'docker push $IMAGE_NAME'
+                script {
+                    docker.withRegistry("https://${env.REGISTRY}", 'docker-credentials-id') {
+                        dockerImage.push('latest')
+                    }
+                }
             }
         }
 
         stage('Deploy') {
             steps {
-                sh 'docker stop python-cicd-demo || true'
-                sh 'docker rm python-cicd-demo || true'
-                sh 'docker run -d -p 5000:5000 --name python-cicd-demo $IMAGE_NAME'
+                echo 'Deploying Docker container'
+                sh "docker rm -f ${IMAGE_NAME} || true"
+                sh "docker run -d --name ${IMAGE_NAME} -p 5000:5000 ${IMAGE_NAME}:latest"
             }
         }
     }
 }
+
