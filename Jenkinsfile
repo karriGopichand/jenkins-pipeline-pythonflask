@@ -9,7 +9,7 @@ pipeline {
     stages {
         stage('Clone Repo') {
             steps {
-                git 'https://github.com/<your-username>/jenkins-pipeline-python-demo-app.git'
+                git 'https://github.com/karriGopichand/jenkins-pipeline-pythonflask.git'
             }
         }
 
