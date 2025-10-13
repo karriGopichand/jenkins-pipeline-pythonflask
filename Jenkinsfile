@@ -15,15 +15,15 @@ pipeline {
 
         stage('Install Dependencies') {
     steps {
-        sh 'python3 -m venv venv'
-        sh '. venv/bin/activate'
-        sh 'pip install -r requirements.txt'
-        // Deactivate is optional as the environment is ephemeral
+        sh '''
+           python3 -m venv venv
+           . venv/bin/activate
+           pip install --upgrade pip
+           pip install -r requirements.txt
+        '''
     }
 }
-
-
-        stage('Build Docker Image') {
+       stage('Build Docker Image') {
             steps {
                 sh 'docker build -t $IMAGE_NAME .'
             }
