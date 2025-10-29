@@ -2,7 +2,7 @@ pipeline {
     agent any 
 
     environment {
-        DOCKER_IMAGE = 'your-dockerhub-karrigopichand/your-image-name:latest'
+        DOCKER_IMAGE = 'karriGopichand/pythonflask-app:latest'
         DOCKER_CREDENTIALS = 'dockerhub-credentials'
     }
 
