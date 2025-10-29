@@ -1,19 +1,18 @@
 pipeline {
-    agent any
+    agent any 
 
     environment {
-        IMAGE_NAME = "my-python-app"
-        REGISTRY = ""  // set your docker registry here, or leave empty if local
+        DOCKER_IMAGE = 'your-dockerhub-karrigopichand/your-image-name:latest'
+        DOCKER_CREDENTIALS = 'dockerhub-credentials'
     }
 
     stages {
-        stage('Checkout') {
+        stage('Checkout SCM') {
             steps {
                 checkout scm
             }
         }
 
-        stages {
         stage('Build') {
             steps {
                 dir('jenkins-python-demo-app') {
@@ -27,23 +26,21 @@ pipeline {
             }
         }
 
-
         stage('Docker Build') {
             steps {
-                script {
-                    dockerImage = docker.build("${IMAGE_NAME}:latest")
+                dir('jenkins-python-demo-app') {
+                    script {
+                        docker.build(DOCKER_IMAGE)
+                    }
                 }
             }
         }
 
         stage('Docker Push') {
-            when {
-                expression { env.REGISTRY != "" }
-            }
             steps {
                 script {
-                    docker.withRegistry("https://${env.REGISTRY}", 'docker-credentials-id') {
-                        dockerImage.push('latest')
+                    docker.withRegistry('', DOCKER_CREDENTIALS) {
+                        docker.image(DOCKER_IMAGE).push()
                     }
                 }
             }
@@ -51,11 +48,18 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                echo 'Deploying Docker container'
-                sh "docker rm -f ${IMAGE_NAME} || true"
-                sh "docker run -d --name ${IMAGE_NAME} -p 5000:5000 ${IMAGE_NAME}:latest"
+                echo 'Deploy your application here.'
+                // Add your deployment commands/scripts here
             }
         }
     }
-}
 
+    post {
+        success {
+            echo 'Pipeline completed successfully.'
+        }
+        failure {
+            echo 'Pipeline failed.'
+        }
+    }
+}
