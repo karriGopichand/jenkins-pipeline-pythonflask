@@ -13,19 +13,15 @@ pipeline {
             }
         }
 
-        stage('Build') {
-    steps {
-        echo 'Installing dependencies and running tests (if any)'
-        sh '''
-            ls -l
-            python3 -m venv venv
-            . venv/bin/activate
-            pip install --upgrade pip
-            pip install -r requirements.txt
-            pytest || true
-        '''
-    }
+        dir('jenkins-python-demo-app') {
+    sh """
+    python3 -m venv venv
+    . venv/bin/activate
+    pip install --upgrade pip
+    pip install -r requirements.txt
+    """
 }
+
 
         stage('Docker Build') {
             steps {
