@@ -14,12 +14,18 @@ pipeline {
         }
 
         stage('Build') {
-            steps {
-                echo 'Installing dependencies and running tests (if any)'
-                sh 'pip install -r requirements.txt'
-                // Add tests here if you want
-            }
-        }
+    steps {
+        echo 'Installing dependencies and running tests (if any)'
+        sh '''
+            python3 -m venv venv
+            . venv/bin/activate
+            pip install --upgrade pip
+            pip install -r requirements.txt
+            pytest || true
+        '''
+    }
+}
+
 
         stage('Docker Build') {
             steps {
