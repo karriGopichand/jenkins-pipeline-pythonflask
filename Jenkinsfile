@@ -17,6 +17,7 @@ pipeline {
     steps {
         echo 'Installing dependencies and running tests (if any)'
         sh '''
+            cd app
             python3 -m venv venv
             . venv/bin/activate
             pip install --upgrade pip
@@ -25,6 +26,7 @@ pipeline {
         '''
     }
 }
+
 
 
         stage('Docker Build') {
