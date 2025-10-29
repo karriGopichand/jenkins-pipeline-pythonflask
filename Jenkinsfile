@@ -27,14 +27,15 @@ pipeline {
         }
 
         stage('Docker Build') {
-            steps {
-                dir('jenkins-python-demo-app') {
-                    script {
-                        docker.build(DOCKER_IMAGE)
-                    }
-                }
+    steps {
+        dir('jenkins-python-demo-app') {
+            script {
+                def customImage = docker.build(DOCKER_IMAGE)
             }
         }
+    }
+}
+
 
         stage('Docker Push') {
             steps {
